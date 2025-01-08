@@ -3,6 +3,7 @@ import styled ,{ThemeProvider} from 'styled-components'
 import {lightTheme} from './utils/Themes'
 import {BrowserRouter, Route, Routes} from'react-router-dom'
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 const Container = styled.div`
   width:100%;
   height:100vh;
@@ -21,7 +22,7 @@ const App = () => {
         <Container>
           <Navbar/>
           <Routes>
-           
+           <Route path='/' element={<Home />} />
           </Routes>
         </Container>
       </BrowserRouter>
