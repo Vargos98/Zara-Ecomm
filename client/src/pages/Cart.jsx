@@ -23,6 +23,7 @@ const Container = styled.div`
   }
   background: ${({ theme }) => theme.bg};
 `;
+
 const Section = styled.div`
   width: 100%;
   max-width: 1400px;
@@ -33,6 +34,7 @@ const Section = styled.div`
   font-size: 22px;
   gap: 28px;
 `;
+
 const Title = styled.div`
   font-size: 28px;
   font-weight: 500;
@@ -50,6 +52,7 @@ const Wrapper = styled.div`
     flex-direction: column;
   }
 `;
+
 const Left = styled.div`
   flex: 1;
   display: flex;
@@ -59,6 +62,7 @@ const Left = styled.div`
     flex: 1.2;
   }
 `;
+
 const Table = styled.div`
   font-size: 16px;
   display: flex;
@@ -66,13 +70,15 @@ const Table = styled.div`
   gap: 30px;
   ${({ head }) => head && `margin-bottom: 22px`}
 `;
+
 const TableItem = styled.div`
-  ${({ flex }) => flex && `flex: 1; `}
+  ${({ flex }) => flex && `flex: 1;`}
   ${({ bold }) =>
     bold &&
     `font-weight: 600; 
   font-size: 18px;`}
 `;
+
 const Counter = styled.div`
   display: flex;
   gap: 12px;
@@ -86,15 +92,19 @@ const Product = styled.div`
   display: flex;
   gap: 16px;
 `;
+
 const Img = styled.img`
   height: 80px;
 `;
+
 const Details = styled.div``;
+
 const Protitle = styled.div`
   color: ${({ theme }) => theme.primary};
   font-size: 16px;
   font-weight: 500;
 `;
+
 const ProDesc = styled.div`
   font-size: 14px;
   font-weight: 400;
@@ -103,6 +113,7 @@ const ProDesc = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
 const ProSize = styled.div`
   font-size: 14px;
   font-weight: 500;
@@ -117,12 +128,14 @@ const Right = styled.div`
     flex: 0.8;
   }
 `;
+
 const Subtotal = styled.div`
   font-size: 22px;
   font-weight: 600;
   display: flex;
   justify-content: space-between;
 `;
+
 const Delivery = styled.div`
   font-size: 18px;
   font-weight: 500;
@@ -135,7 +148,6 @@ const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [reload, setReload] = useState(false);
   const [products, setProducts] = useState([]);
   const [buttonLoad, setButtonLoad] = useState(false);
 
@@ -150,49 +162,54 @@ const Cart = () => {
   const getProducts = async () => {
     setLoading(true);
     const token = localStorage.getItem("krist-app-token");
-    await getCart(token).then((res) => {
+    try {
+      const res = await getCart(token);
       setProducts(res.data);
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          message: "Failed to load cart items.",
+          severity: "error",
+        })
+      );
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   const addCart = async (id) => {
     const token = localStorage.getItem("krist-app-token");
-    await addToCart(token, { productId: id, quantity: 1 })
-      .then((res) => {
-        setReload(!reload);
-      })
-      .catch((err) => {
-        setReload(!reload);
-        dispatch(
-          openSnackbar({
-            message: err.message,
-            severity: "error",
-          })
-        );
-      });
+    try {
+      await addToCart(token, { productId: id, quantity: 1 });
+      getProducts(); // Re-fetch cart after adding
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          message: err.message,
+          severity: "error",
+        })
+      );
+    }
   };
 
   const removeCart = async (id, quantity, type) => {
     const token = localStorage.getItem("krist-app-token");
     let qnt = quantity > 0 ? 1 : null;
     if (type === "full") qnt = null;
-    await deleteFromCart(token, {
-      productId: id,
-      quantity: qnt,
-    })
-      .then((res) => {
-        setReload(!reload);
-      })
-      .catch((err) => {
-        setReload(!reload);
-        dispatch(
-          openSnackbar({
-            message: err.message,
-            severity: "error",
-          })
-        );
+    try {
+      await deleteFromCart(token, {
+        productId: id,
+        quantity: qnt,
       });
+      getProducts(); // Re-fetch cart after removing
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          message: err.message,
+          severity: "error",
+        })
+      );
+    }
   };
 
   const calculateSubtotal = () => {
@@ -204,10 +221,9 @@ const Cart = () => {
 
   useEffect(() => {
     getProducts();
-  }, [reload]);
+  }, []);
 
   const convertAddressToString = (addressObj) => {
-    // Convert the address object to a string representation
     return `${addressObj.firstName} ${addressObj.lastName}, ${addressObj.completeAddress}, ${addressObj.phoneNumber}, ${addressObj.emailAddress}`;
   };
 
@@ -222,7 +238,6 @@ const Cart = () => {
         deliveryDetails.emailAddress;
 
       if (!isDeliveryDetailsFilled) {
-        // Show an error message or handle the situation where delivery details are incomplete
         dispatch(
           openSnackbar({
             message: "Please fill in all required delivery details.",
@@ -231,6 +246,7 @@ const Cart = () => {
         );
         return;
       }
+
       const token = localStorage.getItem("krist-app-token");
       const totalAmount = calculateSubtotal().toFixed(2);
       const orderDetails = {
@@ -241,27 +257,25 @@ const Cart = () => {
 
       await placeOrder(token, orderDetails);
 
-      // Show success message or navigate to a success page
       dispatch(
         openSnackbar({
           message: "Order placed successfully",
           severity: "success",
         })
       );
-      setButtonLoad(false);
-      // Clear the cart and update the UI
-      setReload(!reload);
+      getProducts(); // Clear the cart after placing the order
     } catch (error) {
-      // Handle errors, show error message, etc.
       dispatch(
         openSnackbar({
           message: "Failed to place order. Please try again.",
           severity: "error",
         })
       );
+    } finally {
       setButtonLoad(false);
     }
   };
+
   return (
     <Container>
       {loading ? (
@@ -274,66 +288,53 @@ const Cart = () => {
           ) : (
             <Wrapper>
               <Left>
-                <Table>
-                  <TableItem bold flex>
-                    Product
-                  </TableItem>
+                <Table head>
+                  <TableItem bold flex>Product</TableItem>
                   <TableItem bold>Price</TableItem>
                   <TableItem bold>Quantity</TableItem>
                   <TableItem bold>Subtotal</TableItem>
                   <TableItem></TableItem>
                 </Table>
-                {products?.map((item) => (
-                  <Table>
+                {products.map((item) => (
+                  <Table key={item.product._id}>
                     <TableItem flex>
                       <Product>
-                        <Img src={item?.product?.img} />
+                        <Img src={item.product.img} />
                         <Details>
-                          <Protitle>{item?.product?.title}</Protitle>
-                          <ProDesc>{item?.product?.name}</ProDesc>
+                          <Protitle>{item.product.title}</Protitle>
+                          <ProDesc>{item.product.name}</ProDesc>
                           <ProSize>Size: Xl</ProSize>
                         </Details>
                       </Product>
                     </TableItem>
-                    <TableItem>${item?.product?.price?.org}</TableItem>
+                    <TableItem>${item.product.price.org}</TableItem>
                     <TableItem>
                       <Counter>
                         <div
-                          style={{
-                            cursor: "pointer",
-                            flex: 1,
-                          }}
+                          style={{ cursor: "pointer" }}
                           onClick={() =>
-                            removeCart(item?.product?._id, item?.quantity - 1)
+                            removeCart(item.product._id, item.quantity - 1)
                           }
                         >
                           -
                         </div>
-                        {item?.quantity}
+                        {item.quantity}
                         <div
-                          style={{
-                            cursor: "pointer",
-                            flex: 1,
-                          }}
-                          onClick={() => addCart(item?.product?._id)}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => addCart(item.product._id)}
                         >
                           +
                         </div>
                       </Counter>
                     </TableItem>
                     <TableItem>
-                      {" "}
-                      ${(item.quantity * item?.product?.price?.org).toFixed(2)}
+                      ${(item.quantity * item.product.price.org).toFixed(2)}
                     </TableItem>
                     <TableItem>
                       <DeleteOutline
                         sx={{ color: "red" }}
                         onClick={() =>
-                          removeCart(
-                            item?.product?._id,
-                            item?.quantity - 1,
-                            "full"
-                          )
+                          removeCart(item.product._id, item.quantity - 1, "full")
                         }
                       />
                     </TableItem>
@@ -430,7 +431,7 @@ const Cart = () => {
                   </div>
                 </Delivery>
                 <Button
-                  text="Pace Order"
+                  text="Place Order"
                   small
                   isLoading={buttonLoad}
                   isDisabled={buttonLoad}
