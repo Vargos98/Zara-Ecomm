@@ -8,53 +8,55 @@ import { getAllProducts } from "../api";
 const Container = styled.div`
   padding: 20px 30px;
   height: 100vh;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   gap: 30px;
   @media (max-width: 768px) {
     padding: 20px 12px;
     flex-direction: column;
-    overflow-y: scroll;
   }
   background: ${({ theme }) => theme.bg};
 `;
+
 const Filters = styled.div`
   width: 100%;
   height: fit-content;
-  overflow-y: hidden;
   padding: 20px 16px;
   @media (min-width: 768px) {
     height: 100%;
     width: 230px;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 `;
+
 const FilterSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   padding: 12px;
 `;
+
 const Title = styled.div`
   font-size: 20px;
   font-weight: 500;
 `;
+
 const Menu = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
 `;
+
 const Products = styled.div`
   padding: 12px;
-  overflow: hidden;
-  height: fit-content;
   @media (min-width: 768px) {
     width: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 100%;
   }
 `;
+
 const CardWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -94,60 +96,66 @@ const ShopListing = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [selectedSizes, setSelectedSizes] = useState(["S", "M", "L", "XL"]); // Default selected sizes
+  const [selectedSizes, setSelectedSizes] = useState(["S", "M", "L", "XL"]);
   const [selectedCategories, setSelectedCategories] = useState([
     "Men",
     "Women",
     "Kids",
     "Bags",
-  ]); // Default selected categories
+  ]);
+  const [error, setError] = useState(null);
 
   const getFilteredProductsData = async () => {
-    setLoading(true);
-    // Call the API function for filtered products
-    await getAllProducts(
-      `minPrice=${priceRange[0]}&maxPrice=${priceRange[1]}${
-        selectedSizes.length > 0 ? `&sizes=${selectedSizes.join(",")}` : ""
-      }${
-        selectedCategories.length > 0
-          ? `&categories=${selectedCategories.join(",")}`
-          : ""
-      }`
-    ).then((res) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getAllProducts(
+        `minPrice=${priceRange[0]}&maxPrice=${priceRange[1]}${
+          selectedSizes.length > 0 ? `&sizes=${selectedSizes.join(",")}` : ""
+        }${
+          selectedCategories.length > 0
+            ? `&categories=${selectedCategories.join(",")}`
+            : ""
+        }`
+      );
       setProducts(res.data);
+    } catch (err) {
+      setError("Failed to load products.");
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   useEffect(() => {
     getFilteredProductsData();
   }, [priceRange, selectedSizes, selectedCategories]);
+
   return (
     <Container>
       {loading ? (
         <CircularProgress />
+      ) : error ? (
+        <div>{error}</div>
       ) : (
         <>
           <Filters>
             <Menu>
-              {filter.map((filters) => (
-                <FilterSection>
+              {filter.map((filters, index) => (
+                <FilterSection key={index}>
                   <Title>{filters.name}</Title>
                   {filters.value === "price" ? (
-                    <>
-                      <Slider
-                        aria-label="Price"
-                        defaultValue={priceRange}
-                        min={0}
-                        max={1000}
-                        valueLabelDisplay="auto"
-                        marks={[
-                          { value: 0, label: "$0" },
-                          { value: 1000, label: "$1000" },
-                        ]}
-                        onChange={(e, newValue) => setPriceRange(newValue)}
-                      />
-                    </>
+                    <Slider
+                      aria-label="Price"
+                      value={priceRange}
+                      min={0}
+                      max={1000}
+                      valueLabelDisplay="auto"
+                      marks={[
+                        { value: 0, label: "$0" },
+                        { value: 1000, label: "$1000" },
+                      ]}
+                      onChange={(e, newValue) => setPriceRange(newValue)}
+                    />
                   ) : filters.value === "size" ? (
                     <Item>
                       {filters.items.map((item) => (
@@ -157,9 +165,7 @@ const ShopListing = () => {
                           onClick={() =>
                             setSelectedSizes((prevSizes) =>
                               prevSizes.includes(item)
-                                ? prevSizes.filter(
-                                    (category) => category !== item
-                                  )
+                                ? prevSizes.filter((size) => size !== item)
                                 : [...prevSizes, item]
                             )
                           }
@@ -195,9 +201,13 @@ const ShopListing = () => {
           </Filters>
           <Products>
             <CardWrapper>
-              {products?.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
+              {products.length > 0 ? (
+                products.map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))
+              ) : (
+                <div>No products found</div>
+              )}
             </CardWrapper>
           </Products>
         </>

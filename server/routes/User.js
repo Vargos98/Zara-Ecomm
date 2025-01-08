@@ -11,32 +11,25 @@ import {
   removeFromCart,
   removeFromFavorites,
 } from "../controllers/User.js";
-
-
-import { verifyToken } from "../middlewares/verifyToken.js";//+
-
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
-// Helper to wrap async functions for error handling
-const asyncHandler = (fn) => (req, res, next) =>
-  Promise.resolve(fn(req, res, next)).catch(next);
+router.post("/signup", UserRegister);
+router.post("/signin", UserLogin);
 
-router.post("/signup", asyncHandler(UserRegister));
-router.post("/signin", asyncHandler(UserLogin));
+//cart
+router.get("/cart", verifyToken, getAllCartItems);
+router.post("/cart", verifyToken, addToCart);
+router.patch("/cart", verifyToken, removeFromCart);
 
-// Cart
-router.get("/cart", verifyToken, asyncHandler(getAllCartItems));
-router.post("/cart", verifyToken, asyncHandler(addToCart));
-router.patch("/cart", verifyToken, asyncHandler(removeFromCart));
+//order
+router.get("/order", verifyToken, getAllOrders);
+router.post("/order", verifyToken, placeOrder);
 
-// Order
-router.get("/order", verifyToken, asyncHandler(getAllOrders));
-router.post("/order", verifyToken, asyncHandler(placeOrder));
-
-// Favourites
-router.get("/favorite", verifyToken, asyncHandler(getUserFavourites));
-router.post("/favorite", verifyToken, asyncHandler(addToFavorites));
-router.patch("/favorite", verifyToken, asyncHandler(removeFromFavorites));
+//favourites
+router.get("/favorite", verifyToken, getUserFavourites);
+router.post("/favorite", verifyToken, addToFavorites);
+router.patch("/favorite", verifyToken, removeFromFavorites);
 
 export default router;

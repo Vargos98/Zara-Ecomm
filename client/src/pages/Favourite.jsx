@@ -18,6 +18,7 @@ const Container = styled.div`
   }
   background: ${({ theme }) => theme.bg};
 `;
+
 const Section = styled.div`
   max-width: 1400px;
   padding: 32px 16px;
@@ -47,21 +48,25 @@ const CardWrapper = styled.div`
 const Favourite = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
-  const [reload, setReload] = useState(false);
+  const [error, setError] = useState(null);
 
   const getProducts = async () => {
     setLoading(true);
     const token = localStorage.getItem("krist-app-token");
-    await getFavourite(token).then((res) => {
+    try {
+      const res = await getFavourite(token);
       setProducts(res.data);
+    } catch (error) {
+      setError("Failed to fetch favourites");
+    } finally {
       setLoading(false);
-      setReload(!reload);
-    });
+    }
   };
 
   useEffect(() => {
     getProducts();
   }, []);
+
   return (
     <Container>
       <Section>
@@ -69,18 +74,14 @@ const Favourite = () => {
         <CardWrapper>
           {loading ? (
             <CircularProgress />
+          ) : error ? (
+            <div>{error}</div>
+          ) : products.length === 0 ? (
+            <>No Products</>
           ) : (
-            <>
-              {products.length === 0 ? (
-                <>No Products</>
-              ) : (
-                <CardWrapper>
-                  {products.map((product) => (
-                    <ProductCard product={product} />
-                  ))}
-                </CardWrapper>
-              )}
-            </>
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
           )}
         </CardWrapper>
       </Section>
