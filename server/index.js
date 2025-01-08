@@ -1,54 +1,53 @@
-import express from 'express';
-import cors from 'cors';
-import * as dotenv from 'dotenv';
-import mongoose from 'mongoose'; // Import mongoose
-
-dotenv.config(); // Configure dotenv
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import * as dotenv from "dotenv";
+import UserRouter from "./routes/User.js";
+import ProductRoutes from "./routes/Products.js";
+dotenv.config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
-// error handler
-app.use((err,erq,res,next)=>{
+
+//error handel
+app.use((err, req, res, next) => {
   const status = err.status || 500;
-  const message = err.message || "Something went wrong"
+  const message = err.message || "Something went wrong";
   return res.status(status).json({
-    success:false,
+    success: false,
     status,
     message,
-    
-  })
-})
-
-app.get("/", async (req, res) => {
-  res.status(200).json({
-    message: "Hello from the server!",
   });
 });
 
-const connectDB = async () => {
+app.get("/", async (req, res) => {
+  res.status(200).json({
+    message: "Hello GFG Developers",
+  });
+});
+
+app.use("/api/user/", UserRouter);
+app.use("/api/products/", ProductRoutes);
+
+const connectDB = () => {
   mongoose.set("strictQuery", true);
   mongoose
     .connect(process.env.MONGO_DB)
-    .then(() => {
-      console.log("Connected to MongoDB");
-    })
-    .catch(() => {
-      console.error("Error connecting to MongoDB");
+    .then(() => console.log("Connected to MONGO DB"))
+    .catch((err) => {
+      console.error("failed to connect with mongo");
+      console.error(err);
     });
 };
 
 const startServer = async () => {
   try {
-    await connectDB(); // Call connectDB to connect to MongoDB
-    app.listen(8080, () => {
-      console.log("Server is running on port 8080");
-    });
+    connectDB();
+    app.listen(8080, () => console.log("Server started on port 8080"));
   } catch (error) {
-    console.error("Error starting server", error);
-    process.exit(1);
+    console.log(error);
   }
 };
 
