@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import TextInput from "./TextInput";
 import Button from "./Button";
-import { UserSignIn } from "../api";
+import { UserSignUp } from "../api";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/reducers/userSlice";
 import { openSnackbar } from "../redux/reducers/snackbarSlice";
@@ -24,51 +24,44 @@ const Span = styled.div`
   font-weight: 400;
   color: ${({ theme }) => theme.text_secondary + 90};
 `;
-const TextButton = styled.div`
-  width: 100%;
-  text-align: end;
-  color: ${({ theme }) => theme.text_primary};
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  &:hover {
-    color: ${({ theme }) => theme.primary};
-  }
-`;
 
-const SignIn = () => {
+const SignUp = ({ setOpenAuth }) => {
   const dispatch = useDispatch();
-  const [buttonLoading, setButtonLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const validateInputs = () => {
-    if (!email || !password) {
+    if (!name || !email || !password) {
       alert("Please fill in all fields");
       return false;
     }
     return true;
   };
 
-  const handelSignIn = async () => {
-    setButtonLoading(true);
+  const handleSignUp = async () => {
+    setLoading(true);
     setButtonDisabled(true);
     if (validateInputs()) {
-      await UserSignIn({ email, password })
+      await UserSignUp({ name, email, password })
         .then((res) => {
           dispatch(loginSuccess(res.data));
           dispatch(
             openSnackbar({
-              message: "Login Successful",
+              message: "Sign Up Successful",
               severity: "success",
             })
           );
+          setLoading(false);
+          setButtonDisabled(false);
+          setOpenAuth(false);
         })
         .catch((err) => {
+          setButtonDisabled(false);
           if (err.response) {
-            setButtonLoading(false);
+            setLoading(false);
             setButtonDisabled(false);
             alert(err.response.data.message);
             dispatch(
@@ -78,7 +71,7 @@ const SignIn = () => {
               })
             );
           } else {
-            setButtonLoading(false);
+            setLoading(false);
             setButtonDisabled(false);
             dispatch(
               openSnackbar({
@@ -89,17 +82,24 @@ const SignIn = () => {
           }
         });
     }
+
     setButtonDisabled(false);
-    setButtonLoading(false);
+    setLoading(false);
   };
 
   return (
     <Container>
       <div>
-        <Title>Welcome to Krist 👋</Title>
-        <Span>Please login with your details here</Span>
+        <Title>Create New Account 👋</Title>
+        <Span>Please enter details to create a new account</Span>
       </div>
       <div style={{ display: "flex", gap: "20px", flexDirection: "column" }}>
+        <TextInput
+          label="Full Name"
+          placeholder="Enter your full name"
+          value={name}
+          handelChange={(e) => setName(e.target.value)}
+        />
         <TextInput
           label="Email Address"
           placeholder="Enter your email address"
@@ -113,12 +113,10 @@ const SignIn = () => {
           value={password}
           handelChange={(e) => setPassword(e.target.value)}
         />
-
-        <TextButton>Forgot Password?</TextButton>
         <Button
-          text="Sign In"
-          onClick={handelSignIn}
-          isLoading={buttonLoading}
+          text="Sign Up"
+          onClick={handleSignUp}
+          isLoading={loading}
           isDisabled={buttonDisabled}
         />
       </div>
@@ -126,4 +124,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

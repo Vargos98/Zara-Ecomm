@@ -1,6 +1,6 @@
 export const category = [
   {
-    img: "https://jaxsonmaximus.com/wp-content/uploads/2020/04/34394c211f01e58539f91e79e6ce1420.jpg",
+    img: "https://img.freepik.com/free-photo/man-holding-skateboard-outdoors_23-2148959850.jpg",
     name: "Casual Wear",
     off: "20-40% OFF",
   },
