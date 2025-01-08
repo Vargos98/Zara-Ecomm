@@ -7,7 +7,8 @@
 
 
 
-This project is an e-commerce web application for Zara, built to provide a seamless online shopping experience. It includes functionalities like product browsing, searching, filtering, cart management, and order checkout. The project uses modern web technologies to ensure performance, scalability, and user-friendliness.(NOTE : there are few bugs which I will solve later )
+This project is an e-commerce web application for Zara, built to provide a seamless online shopping experience. It includes functionalities like product browsing, searching, filtering, cart management, and order checkout. The project uses modern web technologies to ensure performance, scalability, and user-friendliness.
+<h3>(NOTE : there are few bugs which I will solve later )</h3>
 
 ## Features
 
