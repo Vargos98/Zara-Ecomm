@@ -1,5 +1,12 @@
 # Zara E-commerce Web Application
 
+![1](https://github.com/user-attachments/assets/00c94221-5ac5-4bd9-81b1-78d19d6d57a1)
+![2](https://github.com/user-attachments/assets/62d7e407-4c1b-458b-a0f8-0be070f3cee9)
+![3](https://github.com/user-attachments/assets/902d204a-f49b-45d8-a74d-dc0710d41aa1)
+![4](https://github.com/user-attachments/assets/c33817c4-e69c-41fc-b30c-c98455eceb78)
+
+
+
 This project is an e-commerce web application for Zara, built to provide a seamless online shopping experience. It includes functionalities like product browsing, searching, filtering, cart management, and order checkout. The project uses modern web technologies to ensure performance, scalability, and user-friendliness.
 
 ## Features
