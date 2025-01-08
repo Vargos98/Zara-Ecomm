@@ -20,6 +20,9 @@ const App = () => {
       <BrowserRouter>
         <Container>
           <Navbar/>
+          <Routes>
+           
+          </Routes>
         </Container>
       </BrowserRouter>
     </ThemeProvider>
