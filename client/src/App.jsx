@@ -1,9 +1,10 @@
-import React from 'react'
+import React ,{useState} from 'react'
 import styled ,{ThemeProvider} from 'styled-components'
 import {lightTheme} from './utils/Themes'
 import {BrowserRouter, Route, Routes} from'react-router-dom'
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Authentication from './pages/Authentication';
 const Container = styled.div`
   width:100%;
   height:100vh;
@@ -16,14 +17,16 @@ const Container = styled.div`
   transition-a:all 0.2s ease;
 `;
 const App = () => {
+  const [openAuth,setOpenAuth] = useState(false)
   return (
     <ThemeProvider theme={lightTheme}>
       <BrowserRouter>
         <Container>
-          <Navbar/>
+          <Navbar setOpenAuth={setOpenAuth}/>
           <Routes>
            <Route path='/' element={<Home />} />
           </Routes>
+          {openAuth && <Authentication openAuth={openAuth} setOpenAuth={setOpenAuth}/>}
         </Container>
       </BrowserRouter>
     </ThemeProvider>
