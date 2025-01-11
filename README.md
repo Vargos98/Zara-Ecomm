@@ -67,5 +67,5 @@ This project is licensed under the MIT License.
 Contact
 For any queries or feedback, feel free to contact:
 
-Author: Vargos98
-Email: [YourEmail@example.com] (replace with your email)
+Author: Umesh Kumar
+
